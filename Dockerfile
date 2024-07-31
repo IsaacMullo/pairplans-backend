@@ -1,4 +1,3 @@
-# Use the official Python image from the Docker Hub
 FROM python:3.11-slim
 
 # Set environment variables to avoid any interaction with pip during the build process
@@ -6,9 +5,18 @@ ENV PYTHONUNBUFFERED 1
 
 # Install necessary system dependencies
 RUN apt-get update && \
-    apt-get install -y build-essential default-libmysqlclient-dev && \
+    apt-get install -y \
+    build-essential \
+    default-libmysqlclient-dev \
+    python3-dev \
+    libssl-dev \
+    libffi-dev && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for mysqlclient
+ENV MYSQLCLIENT_CFLAGS="-I/usr/include/mysql"
+ENV MYSQLCLIENT_LDFLAGS="-L/usr/lib/mysql -lmysqlclient"
 
 # Create and set working directory
 WORKDIR /app
@@ -33,4 +41,4 @@ RUN python manage.py migrate && \
     python manage.py collectstatic --noinput
 
 # Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "your_project_name.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
