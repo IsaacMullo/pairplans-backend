@@ -9,3 +9,10 @@ class PersonViewSet(viewsets.ModelViewSet):
 class ActivityViewSet(viewsets.ModelViewSet):
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        person_id = self.request.query_params.get('person_id')
+        if person_id is not None:
+            queryset = queryset.filter(person__id=person_id)
+        return queryset
